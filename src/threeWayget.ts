@@ -73,11 +73,23 @@ function calculateTime(t1:number, t2:number, t3:number) {
 
 app.post('/post', async (req: Request, res: Response,) => {
 
-  const { username, password , n1, n2, n3} = req.body;
-  await calculateTime(n1,n2, n3).then((time) => {
-  const extacttime = time / 1000;
-  console.log("Total time taken:", extacttime, "ms");
-});
+ const { username, password, n1, n2, n3 } = req.query as {
+    username?: string;
+    password?: string;
+    n1?: number;
+    n2?: number;
+    n3?: number;
+  };
+
+  // Ensure n1, n2, n3 are numbers and provide defaults if undefined
+  const t1 = typeof n1 === "number" ? n1 : 1;
+  const t2 = typeof n2 === "number" ? n2 : 1;
+  const t3 = typeof n3 === "number" ? n3 : 1;
+
+  await calculateTime(t1, t2, t3).then((time) => {
+    const extacttime = time / 1000;
+    console.log("Total time taken:", extacttime, "ms");
+  });
   if (username == "sachin") {
     console.log("sachin present");
   }
