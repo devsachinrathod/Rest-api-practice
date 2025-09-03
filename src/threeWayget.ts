@@ -100,7 +100,30 @@ app.post('/post', async (req: Request, res: Response,) => {
   console.log(`this the username : ${username} and password : ${password}`
   )
 })
+// You need to import or define the User model above this route if you want to use it.
+// For demonstration, here's a placeholder User object with a static findOneById method.
+// Replace this with your actual User model import.
+class User {
+  static findOneById(id?: string) {
+    // Dummy implementation, replace with actual DB logic
+    if (id === "1") return { id: "1", name: "Sachin" };
+    return null;
+  }
+}
 
+app.get('/api/getuser', (req: Request, res: Response) => {
+  const getId = req.query.getId as string | undefined;
+  try {
+    const user = User.findOneById(getId);
+    if (user) {
+      res.send(`User exists on the platform: ${JSON.stringify(user)}`);
+    } else {
+      res.status(404).send("User does not exist on the platform");
+    }
+  } catch (err) {
+    res.status(500).send("Please sign in, user not exist");
+  }
+});
 app.listen(port, () => {
   console.log(`🚀 Server running at http://localhost:${port}`);
 });
