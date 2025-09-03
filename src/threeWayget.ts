@@ -124,16 +124,20 @@ app.get('/api/getuser', (req: Request, res: Response) => {
     res.status(500).send("Please sign in, user not exist");
   }
 });
-
-app.get('/health-check-up',(req : Request , res:Response)=>{
-  const userId = req.query.userId;
-  const {username ,password}= req.body;
-  if(userId !== "212" && username !== "sachin" && password !== "echan"){
-    res.status(404).send("user is not found");
+function checkAuth(username: any, password:any){
+  if(username !== "sachin" && password !== "echan"){
+    return false;
   }
   else{
-res.send({ message: "Login success", username });
-
+  return;
+  }
+}
+app.get('/health-check-up',(req : Request , res:Response)=>{
+ const {username , password} = req.body;
+  if(checkAuth(username, password)){
+    res.status(403).send("user is not exist");
+  } else {
+    res.status(200).send("Authentication ahe");
   }
 })
 app.listen(port, () => {
