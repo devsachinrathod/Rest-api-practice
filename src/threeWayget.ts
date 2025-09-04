@@ -1,11 +1,23 @@
 import express from "express";
-import type { Request, Response } from "express";
+import type { Request, Response ,NextFunction} from "express";
 import * as fs from "fs";
 import path from "path";
+
 
 const app = express();
 app.use(express.json());
 const port = 4000;
+
+ function authChecker(req: Request, res: Response, next: NextFunction) {
+  const { username, password } = req.body;
+
+  if (username !== "sachin" || password !== "echan") {
+    return res.status(401).json({ message: "User does not exist in this website" });
+  }
+
+  console.log("✅ User authenticated successfully");
+  next(); // continue
+}
 
 app.get("/create-file", (req: Request, res: Response) => {
   try {
@@ -133,29 +145,27 @@ app.get("/create-file", (req: Request, res: Response) => {
 //   }
 // }
 
-// app.get('/health-check-up',(req : Request , res:Response)=>{
-//  const {username , password} = req.body;
-//   if(checkAuth(username, password)){
-//     res.status(403).send("user is not exist");
-//   } 
-//   return;
-// })
+app.get('/health-check-up',(req : Request , res:Response)=>{
+ const {username , password} = req.body;
+  if(checkAuth(username, password)){
+    res.status(403).send("user is not exist");
+  } 
+  return;
+})
 
 
 function calculateSomething(arr: any[]): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(() => {
       for (let i = arr.length - 1; i >= 0; i--) {
-        console.log("The array Element:", arr[i]);
+        resolve(console.log("The array Element:", arr[i]));
       }
-      resolve();
     }, 3000);
   });
 }
 
-app.get("/get-array-element", async (req: Request, res: Response) => {
+app.get("/get-array-element",authChecker, async (req: Request, res: Response) => {
   let numbers = req.query.number;
-
   // Ensure it's an array
   if (!Array.isArray(numbers)) {
     numbers = [numbers !== undefined ? numbers : ""];

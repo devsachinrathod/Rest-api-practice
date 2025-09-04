@@ -1,10 +1,11 @@
 import express from "express";
 import * as fs from "fs";
 import path from "path";
+import { authChecker } from "../src/middleware.js";
 const app = express();
 app.use(express.json());
 const port = 4000;
-app.get("/create-file", (req, res) => {
+app.get("/create-file", authChecker, (req, res) => {
     try {
         // Build absolute path to Desktop
         const desktopPath = path.join(process.env.HOMEPATH || "C:\\Users\\ADMIN\Desktop\sachin.txt");
@@ -125,9 +126,8 @@ function calculateSomething(arr) {
     return new Promise((resolve) => {
         setTimeout(() => {
             for (let i = arr.length - 1; i >= 0; i--) {
-                console.log("The array Element:", arr[i]);
+                resolve(console.log("The array Element:", arr[i]));
             }
-            resolve();
         }, 3000);
     });
 }
