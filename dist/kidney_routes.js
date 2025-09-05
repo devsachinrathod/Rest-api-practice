@@ -2,17 +2,34 @@ import express from "express";
 const app = express();
 app.use(express.json());
 const port = 4001;
-app.post("/", (req, res) => {
-    const kidneyId = req.query.kidneyId;
-    const { username, password } = req.body;
-    if (Number(kidneyId) !== 1) {
-        res.send("don't have kidney right now");
-    }
-    console.log(kidneyId);
+function usercheck(username, password) {
     if (username !== "sachin" || password !== "echan") {
-        res.status(403).send("wrong inputs please give right inputs");
+        return false;
     }
-    console.log(username, password);
+    else {
+        return true;
+    }
+}
+function kidneyCheck(kidneyId) {
+    if (kidneyId !== 1) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+app.post("/", (req, res) => {
+    const kidneyIdd = req.query.kidneyId;
+    try {
+        if (!usercheck(req.body.username, req.bodxy.password)) {
+            return res.status(401).json({ message: "User doesn't exist" });
+        }
+    } catch (err) {
+        return res.status(402).send("invalid data", err);
+    }
+    if (!kidneyCheck(Number(kidneyIdd))) {
+        return res.status(403).send("Not availble kidney");
+    }
 });
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
