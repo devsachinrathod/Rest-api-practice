@@ -1,11 +1,18 @@
 import express from "express";
 import * as fs from "fs";
 import path from "path";
-import { authChecker } from "../src/middleware.js";
 const app = express();
 app.use(express.json());
 const port = 4000;
-app.get("/create-file", authChecker, (req, res) => {
+function authChecker(req, res, next) {
+    const { username, password } = req.body;
+    if (username !== "sachin" || password !== "echan") {
+        return res.status(401).json({ message: "User does not exist in this website" });
+    }
+    console.log("✅ User authenticated successfully");
+    next(); // continue
+}
+app.get("/create-file", (req, res) => {
     try {
         // Build absolute path to Desktop
         const desktopPath = path.join(process.env.HOMEPATH || "C:\\Users\\ADMIN\Desktop\sachin.txt");
@@ -131,7 +138,7 @@ function calculateSomething(arr) {
         }, 3000);
     });
 }
-app.get("/get-array-element", async (req, res) => {
+app.get("/get-array-element", authChecker, async (req, res) => {
     let numbers = req.query.number;
     // Ensure it's an array
     if (!Array.isArray(numbers)) {

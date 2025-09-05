@@ -145,13 +145,13 @@ app.get("/create-file", (req: Request, res: Response) => {
 //   }
 // }
 
-app.get('/health-check-up',(req : Request , res:Response)=>{
- const {username , password} = req.body;
-  if(checkAuth(username, password)){
-    res.status(403).send("user is not exist");
-  } 
-  return;
-})
+// app.get('/health-check-up',(req : Request , res:Response)=>{
+//  const {username , password} = req.body;
+//   if(checkAuth(username, password)){
+//     res.status(403).send("user is not exist");
+//   } 
+//   return;
+// })
 
 
 function calculateSomething(arr: any[]): Promise<void> {
