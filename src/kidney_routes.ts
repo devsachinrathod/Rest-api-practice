@@ -1,3 +1,4 @@
+import { error } from "console";
 import type { Request ,Response} from "express";
 import express from "express";
 
@@ -22,7 +23,7 @@ function kidneyCheck(kidneyId:number){
   }
 }
 
-app.post("/", (req:Request , res:Response)=>{
+app.get("/", (req:Request , res:Response)=>{
     const kidneyIdd = req.query.kidneyId;
  if(!usercheck(req.body.username, req.body.password)){
     res.json(()=>{
@@ -33,6 +34,17 @@ app.post("/", (req:Request , res:Response)=>{
    res.status(403).send("Not availble kidney");
  }
 })
+app.use((req:any, res:any, error:any)=>{
+  if(error){
+  res.status(404).send("invalid page routes");
+  }
+  else{
+    res.status(200).send("youre going well");
+  }});
+
+// app.use((req:any, res:any, error:any, next:any)=>{
+//    res.status(500).send("Internal Error occured");
+// })
 
 app.listen(port ,()=>{
     console.log(`Listening on port ${port}`);
