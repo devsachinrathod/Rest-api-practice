@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import express from "express";
 import jwt from "jsonwebtoken";
 const jwtPassword = "sachinsecretpassword";
-import zod from "zod";
+import zod, { any } from "zod";
 
 const app = express();
 app.use(express.json());
@@ -14,7 +14,8 @@ const userSchema = zod.object({
   password: zod.string().min(8)
 })
 
-let UserLocalDatabase = [];
+let UserLocalDatabase:any = [];
+console.log("checking_____________________",UserLocalDatabase);
 function usercheck(username: string, password: string) {
   if (username !== "sachin" || password !== "echan") {
     return false;
@@ -31,6 +32,21 @@ function kidneyCheck(kidneyId: number) {
     return false;
   }
 }
+
+function userVerify (token:any){
+  // const result = jwt.verify(token, jwtPassword);
+  //  if(result === "true"){
+  // console.log("user exists");
+  // }
+ for(let i = 0; i<UserLocalDatabase.length; i++){
+  if(UserLocalDatabase[i] === token){
+    console.log("+++++++++++++++ User is find in the db ++++++++++++++");
+  }
+  else{
+    console.log("--------------Not found-------------");
+  }
+ }
+}
 app.post("/sign-up", (req: Request, res: Response) => {
   const data = userSchema.safeParse(req.body);
 
@@ -43,7 +59,9 @@ app.post("/sign-up", (req: Request, res: Response) => {
     UserLocalDatabase.push(decodedata);
     console.log("Decoded the data is this : ", UserLocalDatabase);
     console.log("this the jwt tokens", result);
+    userVerify(result);
     return result;
+    
   }
   catch (e) {
     console.log("Error is this", e);
