@@ -38,9 +38,9 @@ function verifyToken(token:any){
     }
 }
 
-console.log(GenerateTokens("sr5631080@gmail.com", "test12"));
-console.log(forDecodingToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNyNTYzMTA4MEBnbWFpbC5jb20iLCJwYXNzd29yZCI6InRlc3QxMiIsImlhdCI6MTc1NzYwNDcxMX0.wxilwMkMtHSyIOdiqJIEho3Ec_icniR2cOr-I2XNcuc"));
-console.log(verifyToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNyNTYzMTA4MEBnbWFpbC5jb20iLCJwYXNzd29yZCI6InRlc3QxMiIsImlhdCI6MTc1NzYwNDcxMX0.wxilwMkMtHSyIOdiqJIEho3Ec_icniR2cOr-I2XNcuc"));
+console.log("gerating tokens",GenerateTokens("sr5631080@gmail.com", "tests12"));
+console.log("decode tokens",forDecodingToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNyNTYzMTA4MEBnbWFpbC5jb20iLCJwYXNzd29yZCI6InRlc3QxMiIsImlhdCI6MTc1NzYwNDcxMX0.wxilwMkMtHSyIOdiqJIEho3Ec_icniR2cOr-I2XNcuc"));
+console.log("verify tokens",verifyToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNyNTYzMTA4MEBnbWFpbC5jb20iLCJwYXNzd29yZCI6InRlc3QxMiIsImlhdCI6MTc1NzYwNDcxMX0.wxilwMkMtHSyIOdiqJIEho3Ec_icniR2cOr-I2XNcuc"));
 
 
 
