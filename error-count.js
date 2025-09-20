@@ -1,9 +1,17 @@
 import { error } from 'console';
 import express from 'express';
+import jwt from 'jsonwebtoken';
 const app = express();
 const port = 3001;
-
+const jwt_pass = 'echan142';
 let errorCount = 0;
+
+function gettingJsonwebtoken(string){
+ let token = jwt.sign(jwt_pass, string);
+ return token;
+}
+const result = gettingJsonwebtoken("sachin");
+console.log(result);
 
 app.get('/user', function (req, res) {
         throw new Error("User not found");
