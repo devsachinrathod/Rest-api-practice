@@ -68,6 +68,24 @@ app.post("/sign-up", (req: Request, res: Response) => {
   }
 })
 
+app.post("/login" , (req: Request, res: Response) => {
+  const data = userSchema.safeParse(req.body);
+  if (!data) {
+    return "Give the inputs first";
+  }
+  try {
+    const token = jwt.sign(data, jwtPassword);
+    const decodedata = jwt.verify(token, jwtPassword);
+    console.log("Decoded the data is this : ", decodedata);
+    console.log("this the jwt tokens", token);
+    userVerify(token);
+    return token;
+  }
+  catch (e) {
+    console.log("Error is this", e);
+  }
+})
+
 
 app.get("/", (req: Request, res: Response) => {
   const kidneyIdd = req.query.kidneyId;

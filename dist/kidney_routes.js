@@ -59,6 +59,23 @@ app.post("/sign-up", (req, res) => {
         console.log("Error is this", e);
     }
 });
+app.post("/login", (req, res) => {
+    const data = userSchema.safeParse(req.body);
+    if (!data) {
+        return "Give the inputs first";
+    }
+    try {
+        const token = jwt.sign(data, jwtPassword);
+        const decodedata = jwt.verify(token, jwtPassword);
+        console.log("Decoded the data is this : ", decodedata);
+        console.log("this the jwt tokens", token);
+        userVerify(token);
+        return token;
+    }
+    catch (e) {
+        console.log("Error is this", e);
+    }
+});
 app.get("/", (req, res) => {
     const kidneyIdd = req.query.kidneyId;
     if (!usercheck(req.body.username, req.body.password)) {

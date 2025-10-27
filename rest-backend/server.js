@@ -1,95 +1,96 @@
 const express = require("express");
-const zod = require("zod");
-const jwt = require("jsonwebtoken");
-const { WebSocketServer } = require("ws");
 const http = require("http");
-const mongoose = require("mongoose");
+const path = require("path");
+const { WebSocketServer } = require("ws");
 
 const app = express();
-const jwtSecret = "Echan@12";
-const PORT = 3000;
-
-// ✅ Connect MongoDB
-mongoose.connect("mongodb://127.0.0.1:27017/chatApp")
-  .then(() => console.log("🗄️ Connected to MongoDB"))
-  .catch((err) => console.error("❌ MongoDB error:", err));
-
-// ✅ Chat schema
-const chatSchema = new mongoose.Schema({
-  username: String,
-  message: String,
-  timestamp: { type: Date, default: Date.now },
-});
-
-const Chat = mongoose.model("Chat", chatSchema);
-
-app.use(express.json());
-
-// ✅ Zod validation
-const userSchema = zod.object({
-  username: zod.string().min(3),
-  age: zod.number().min(3),
-});
-
-// ✅ POST: Create token
-app.post("/data", async (req, res) => {
-  const data = req.body;
-  const parsed = userSchema.safeParse(data);
-
-  if (!parsed.success) {
-    return res.status(400).json({ error: parsed.error.errors });
-  }
-
-  const token = jwt.sign(parsed.data, jwtSecret);
-  console.log("🪪 Token created:", token);
-  res.json({ token });
-});
-
-// ✅ GET: Verify token
-app.get("/data", (req, res) => {
-  const token = req.headers.authorization;
-  if (!token) return res.status(401).json({ error: "Missing token" });
-
-  try {
-    const decoded = jwt.verify(token, jwtSecret);
-    res.json({ decoded });
-  } catch {
-    res.status(401).json({ error: "Invalid token" });
-  }
-});
-
-// ✅ Create HTTP + WebSocket Server
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
-// ✅ WebSocket logic
-wss.on("connection", async (ws) => {
-  console.log("🟢 User connected");
+app.use(express.static(path.join(__dirname, "public")));
 
-  // Send existing chat history
-  const history = await Chat.find().sort({ timestamp: 1 });
-  ws.send(JSON.stringify({ type: "history", data: history }));
+const players = new Map(); // id -> {x, y, color, score, isTagger, lastSeen}
 
-  ws.on("message", async (data) => {
-    try {
-      const { username, message } = JSON.parse(data);
-      console.log(`💬 ${username}: ${message}`);
-
-      // Save to MongoDB
-      const newChat = await Chat.create({ username, message });
-
-      // Broadcast message to all clients
-      const chatMsg = JSON.stringify({ type: "chat", data: newChat });
-      wss.clients.forEach((client) => {
-        if (client.readyState === ws.OPEN) client.send(chatMsg);
-      });
-    } catch (err) {
-      console.error("⚠️ Invalid message format:", err);
+// Broadcast to all
+function broadcast(data) {
+    const msg = JSON.stringify(data);
+    for (const client of wss.clients) {
+        if (client.readyState === 1) client.send(msg);
     }
-  });
+}
 
-  ws.on("close", () => console.log("🔴 User disconnected"));
+function broadcastWorld() {
+    const payload = {
+        type: "world",
+        players: Array.from(players.entries()).map(([id, p]) => ({
+            id,
+            x: p.x,
+            y: p.y,
+            color: p.color,
+            score: p.score,
+            isTagger: p.isTagger
+        })),
+    };
+    broadcast(payload);
+}
+
+// Handle connections
+wss.on("connection", (ws) => {
+    const id = Math.random().toString(36).slice(2, 9);
+    const spawn = { x: Math.random() * 900 + 50, y: Math.random() * 400 + 50 };
+    const color = `hsl(${Math.random() * 360}, 70%, 55%)`;
+    const isTagger = players.size === 0; // first player = tagger
+    players.set(id, { ...spawn, color, score: 0, isTagger, lastSeen: Date.now() });
+
+    ws.send(JSON.stringify({ type: "welcome", id }));
+
+    ws.on("message", (data) => {
+        let msg;
+        try { msg = JSON.parse(data); } catch { return; }
+
+        const p = players.get(id);
+        if (!p) return;
+
+        if (msg.type === "move") {
+            p.x += msg.dx || 0;
+            p.y += msg.dy || 0;
+            p.x = Math.max(0, Math.min(1000, p.x));
+            p.y = Math.max(0, Math.min(1000, p.y));
+            p.lastSeen = Date.now();
+
+            // check collisions
+            for (const [oid, other] of players.entries()) {
+                if (oid === id) continue;
+                const dx = p.x - other.x;
+                const dy = p.y - other.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 30) {
+                    // Tag mode logic
+                    if (p.isTagger && !other.isTagger) {
+                        p.score += 1;
+                        p.isTagger = false;
+                        other.isTagger = true;
+                        broadcast({ type: "tag", tagger: oid });
+                    }
+                }
+            }
+        }
+
+        if (msg.type === "chat") {
+            broadcast({ type: "chat", from: id, text: msg.text });
+        }
+    });
+
+    ws.on("close", () => {
+        players.delete(id);
+        broadcastWorld();
+    });
+
+    broadcastWorld();
 });
 
-// ✅ Start server
-server.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+// periodic updates
+setInterval(broadcastWorld, 1000 / 10);
+
+const PORT = 3000;
+server.listen(PORT, () => console.log(`🟢 Server running on http://localhost:${PORT}`));
