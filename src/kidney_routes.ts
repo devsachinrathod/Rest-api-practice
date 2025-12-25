@@ -86,6 +86,9 @@ app.post("/login" , (req: Request, res: Response) => {
   }
 })
 
+app.get("/"(req: Request, res: Response) => {
+ func 
+})
 
 app.get("/", (req: Request, res: Response) => {
   const kidneyIdd = req.query.kidneyId;

@@ -99,7 +99,6 @@ app.delete('/', function(req, res) {
 
 app.post('/User_money', function(req, res) {
     const money = req.body.money;
-
     const IntMoney = parseInt(money);
 
     if(!IntMoney === " " ){
